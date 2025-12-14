@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TeamSplit – Professional Team Allocation</title>
+    <meta name="description" content="Intelligent team allocation tool for balanced, fair group assignments.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        slate: { 925: '#0b0f1a', 875: '#111827' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+        }
+
+        .glass {
+            background: rgba(30, 41, 59, 0.5);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-in {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+
+        .team-1 {
+            border-left-color: #6366f1;
+        }
+
+        .team-2 {
+            border-left-color: #10b981;
+        }
+
+        .team-3 {
+            border-left-color: #f59e0b;
+        }
+
+        .team-4 {
+            border-left-color: #ec4899;
+        }
+
+        .team-5 {
+            border-left-color: #06b6d4;
+        }
+
+        .team-6 {
+            border-left-color: #8b5cf6;
+        }
+
+        .team-7 {
+            border-left-color: #ef4444;
+        }
+
+        .team-8 {
+            border-left-color: #14b8a6;
+        }
+    </style>
+</head>
+
+<body class="bg-slate-925 text-slate-200 min-h-screen">
+
+    <!-- AD: TOP BANNER 728x90 -->
+    <div class="w-full flex justify-center py-2 bg-slate-875 border-b border-slate-800">
+        <div
+            class="w-[728px] max-w-full h-[90px] bg-slate-800/50 border border-dashed border-slate-700 flex items-center justify-center text-slate-500 text-xs rounded">
+            Ad Space (728×90)</div>
+    </div>
+    <!-- END AD -->
+
+    <header class="px-4 py-4 border-b border-slate-800">
+        <div class="max-w-6xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div
+                    class="w-9 h-9 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-lg font-semibold text-white">TeamSplit</h1>
+                    <p class="text-[11px] text-slate-500">Professional Team Allocation</p>
+                </div>
+            </div>
+            <button id="historyBtn" class="p-2 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white"
+                title="History">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 py-6">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+
+            <div class="lg:col-span-3 space-y-5">
+                <!-- Members Input -->
+                <section class="glass rounded-xl p-5">
+                    <div class="flex items-center justify-between mb-3">
+                        <h2 class="text-sm font-medium text-slate-300">Team Members</h2>
+                        <div class="flex items-center gap-2">
+                            <span id="memberCount" class="text-xs text-slate-500 bg-slate-800 px-2 py-0.5 rounded">0
+                                members</span>
+                            <button id="clearBtn"
+                                class="text-xs text-slate-500 hover:text-red-400 px-2 py-0.5 rounded hover:bg-red-500/10">Clear</button>
+                        </div>
+                    </div>
+                    <textarea id="namesInput"
+                        class="w-full h-36 bg-slate-800/50 border border-slate-700 rounded-lg p-3 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 resize-none placeholder-slate-600"
+                        placeholder="Enter names, one per line&#10;&#10;Mark senior members with * suffix:&#10;Alice*&#10;Bob&#10;Carol*"></textarea>
+                    <div id="duplicateWarning"
+                        class="hidden mt-2 text-xs text-amber-400 bg-amber-500/10 px-3 py-2 rounded-lg"></div>
+                    <p class="mt-2 text-[11px] text-slate-600">Tip: Add <code class="bg-slate-800 px-1 rounded">*</code>
+                        to denote senior members. Duplicates are auto-numbered.</p>
+                </section>
+
+                <!-- Configuration -->
+                <section class="glass rounded-xl p-5">
+                    <h2 class="text-sm font-medium text-slate-300 mb-4">Configuration</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs text-slate-500 mb-1.5">Number of Groups</label>
+                            <div class="flex items-center gap-3">
+                                <input type="range" id="teamCount" min="2" max="8" value="2"
+                                    class="flex-1 h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-indigo-500">
+                                <span id="teamCountDisplay"
+                                    class="w-8 h-8 flex items-center justify-center bg-indigo-500/20 text-indigo-400 font-semibold text-sm rounded-lg">2</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-500 mb-1.5">Distribution Mode</label>
+                            <select id="distMode"
+                                class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                <option value="balanced">Balanced (Equal Sizes)</option>
+                                <option value="random">Random</option>
+                                <option value="snake">Snake Draft</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-slate-500 mb-1.5">Team Naming</label>
+                            <select id="namingStyle"
+                                class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                                <option value="numeric">Team 1, Team 2...</option>
+                                <option value="alpha">Team A, Team B...</option>
+                                <option value="colors">Red, Blue, Green...</option>
+                            </select>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Separation Rules -->
+                <section class="glass rounded-xl p-5">
+                    <div class="flex items-center justify-between mb-3">
+                        <h2 class="text-sm font-medium text-slate-300">Separation Rules</h2>
+                        <span class="text-[10px] text-slate-600">Members who should be on different teams</span>
+                    </div>
+                    <div class="flex gap-2 items-center">
+                        <select id="sep1"
+                            class="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500">
+                            <option value="">Select member...</option>
+                        </select>
+                        <span class="text-slate-600 text-xs">≠</span>
+                        <select id="sep2"
+                            class="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500">
+                            <option value="">Select member...</option>
+                        </select>
+                    </div>
+                </section>
+
+                <!-- Actions -->
+                <div class="flex gap-3">
+                    <button id="generateBtn"
+                        class="flex-1 py-3 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 rounded-lg font-medium shadow-lg shadow-indigo-500/20 transition-all hover:shadow-xl flex items-center justify-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        Generate Teams
+                    </button>
+                    <button id="shuffleBtn"
+                        class="px-4 py-3 bg-slate-800 hover:bg-slate-700 rounded-lg text-slate-400 hover:text-white transition-colors"
+                        title="Reshuffle">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                    </button>
+                </div>
+
+                <div id="errorMsg"
+                    class="hidden bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-2.5 rounded-lg text-sm">
+                </div>
+
+                <!-- Results -->
+                <section id="resultsSection" class="hidden">
+                    <div class="flex items-center justify-between mb-3">
+                        <h2 class="text-sm font-medium text-slate-300">Generated Teams</h2>
+                        <div class="flex gap-2">
+                            <button id="copyBtn"
+                                class="text-xs px-3 py-1.5 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 rounded-lg transition-colors">📋
+                                Copy</button>
+                            <button id="exportBtn"
+                                class="text-xs px-3 py-1.5 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 rounded-lg transition-colors">📤
+                                Export</button>
+                        </div>
+                    </div>
+                    <div id="teamsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+                    <p id="timestamp" class="text-[10px] text-slate-600 mt-3 text-center"></p>
+                </section>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="space-y-5">
+                <!-- AD: SIDEBAR 300x250 -->
+                <div class="w-full">
+                    <div
+                        class="w-full h-[200px] bg-slate-800/50 border border-dashed border-slate-700 flex items-center justify-center text-slate-500 text-xs rounded">
+                        Ad Space (300×250)</div>
+                </div>
+                <!-- END AD -->
+
+                <div class="glass rounded-xl p-4">
+                    <h3 class="text-xs font-medium text-slate-400 mb-2">Quick Stats</h3>
+                    <div class="grid grid-cols-2 gap-2 text-center">
+                        <div class="bg-slate-800/50 rounded-lg p-2">
+                            <div id="statMembers" class="text-lg font-semibold text-indigo-400">0</div>
+                            <div class="text-[10px] text-slate-500">Members</div>
+                        </div>
+                        <div class="bg-slate-800/50 rounded-lg p-2">
+                            <div id="statSeniors" class="text-lg font-semibold text-amber-400">0</div>
+                            <div class="text-[10px] text-slate-500">Seniors</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass rounded-xl p-4">
+                    <h3 class="text-xs font-medium text-slate-400 mb-2">Recent Sessions</h3>
+                    <div id="historyList" class="space-y-1 text-xs text-slate-500">
+                        <p>No history yet</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="toast"
+        class="fixed bottom-4 left-1/2 -translate-x-1/2 bg-emerald-600 text-white px-4 py-2 rounded-lg shadow-lg opacity-0 transition-opacity duration-300 text-sm">
+        Copied!</div>
+
+    <!-- History Modal -->
+    <div id="historyModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center z-50">
+        <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 w-full max-w-md mx-4">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-medium">Session History</h3>
+                <button id="closeHistory" class="text-slate-500 hover:text-white">&times;</button>
+            </div>
+            <div id="historyContent" class="space-y-2 max-h-64 overflow-y-auto text-sm"></div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // TEAMSPLIT CORE LOGIC
+        // ============================================
+        const $ = id => document.getElementById(id);
+        const TEAM_NAMES = { numeric: i => `Team ${i + 1}`, alpha: i => `Team ${'ABCDEFGH'[i]}`, colors: i => ['Red', 'Blue', 'Green', 'Orange', 'Purple', 'Cyan', 'Pink', 'Teal'][i] };
+        let teams = [], history = JSON.parse(localStorage.getItem('ts-history') || '[]');
+
+        /**
+         * Parse input text into member objects with unique IDs.
+         * Handles duplicate names by appending (#2), (#3), etc.
+         * @param {string} txt - Raw input text
+         * @returns {Array<{id: string, name: string, displayName: string, senior: boolean}>}
+         */
+        function parseMembers(txt) {
+            const lines = txt.split('\n').map(n => n.trim()).filter(n => n);
+            const nameCount = {};
+            const members = [];
+
+            lines.forEach((line, index) => {
+                const senior = line.endsWith('*');
+                const baseName = line.replace(/\*$/, '').trim();
+
+                if (!baseName) return;
+
+                // Track occurrences of each name
+                const lowerName = baseName.toLowerCase();
+                nameCount[lowerName] = (nameCount[lowerName] || 0) + 1;
+                const occurrence = nameCount[lowerName];
+
+                // Create unique ID using index
+                const id = `member_${index}_${Date.now()}`;
+
+                // Display name shows (#N) for duplicates
+                const displayName = occurrence > 1 ? `${baseName} (#${occurrence})` : baseName;
+
+                members.push({
+                    id,
+                    name: baseName,
+                    displayName,
+                    senior,
+                    _occurrence: occurrence
+                });
+            });
+
+            // Go back and mark first occurrences if there are duplicates
+            const finalCounts = {};
+            members.forEach(m => {
+                const key = m.name.toLowerCase();
+                finalCounts[key] = (finalCounts[key] || 0) + 1;
+            });
+
+            const seen = {};
+            members.forEach(m => {
+                const key = m.name.toLowerCase();
+                seen[key] = (seen[key] || 0) + 1;
+                if (finalCounts[key] > 1) {
+                    m.displayName = `${m.name} (#${seen[key]})`;
+                }
+            });
+
+            return members;
+        }
+
+        /**
+         * Check for duplicate names and show warning
+         */
+        function checkDuplicates(members) {
+            const counts = {};
+            members.forEach(m => {
+                const key = m.name.toLowerCase();
+                counts[key] = (counts[key] || 0) + 1;
+            });
+
+            const duplicates = Object.entries(counts).filter(([_, c]) => c > 1);
+
+            if (duplicates.length > 0) {
+                const names = duplicates.map(([name, count]) => `"${name}" (×${count})`).join(', ');
+                $('duplicateWarning').textContent = `⚠️ Duplicate names detected: ${names}. Each has been numbered for clarity.`;
+                $('duplicateWarning').classList.remove('hidden');
+            } else {
+                $('duplicateWarning').classList.add('hidden');
+            }
+        }
+
+        // Persist names
+        $('namesInput').value = localStorage.getItem('ts-names') || '';
+        $('namesInput').oninput = () => {
+            localStorage.setItem('ts-names', $('namesInput').value);
+            updateUI();
+        };
+        $('clearBtn').onclick = () => {
+            $('namesInput').value = '';
+            localStorage.removeItem('ts-names');
+            updateUI();
+        };
+        $('teamCount').oninput = () => $('teamCountDisplay').textContent = $('teamCount').value;
+
+        function updateUI() {
+            const members = parseMembers($('namesInput').value);
+            const seniors = members.filter(x => x.senior);
+
+            checkDuplicates(members);
+
+            $('memberCount').textContent = `${members.length} member${members.length !== 1 ? 's' : ''}`;
+            $('statMembers').textContent = members.length;
+            $('statSeniors').textContent = seniors.length;
+
+            // Update separation dropdowns with unique IDs
+            [$('sep1'), $('sep2')].forEach(sel => {
+                const currentVal = sel.value;
+                sel.innerHTML = '<option value="">Select member...</option>';
+                members.forEach(m => {
+                    const opt = document.createElement('option');
+                    opt.value = m.id;
+                    opt.textContent = m.displayName + (m.senior ? ' ★' : '');
+                    sel.appendChild(opt);
+                });
+                // Restore selection if still valid
+                if (members.some(m => m.id === currentVal)) {
+                    sel.value = currentVal;
+                }
+            });
+        }
+
+        function shuffle(a) {
+            const arr = [...a];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function generate() {
+            $('errorMsg').classList.add('hidden');
+
+            const members = parseMembers($('namesInput').value);
+            const numTeams = +$('teamCount').value;
+            const sep1Id = $('sep1').value;
+            const sep2Id = $('sep2').value;
+
+            // Validation
+            if (!members.length) return showErr('Please add at least one member.');
+            if (members.length < numTeams) return showErr(`Not enough members for ${numTeams} groups.`);
+            if ((sep1Id && !sep2Id) || (!sep1Id && sep2Id)) return showErr('Select both separation members or none.');
+            if (sep1Id && sep1Id === sep2Id) return showErr('Cannot separate a member from themselves.');
+
+            const mode = $('distMode').value;
+
+            for (let attempt = 0; attempt < 500; attempt++) {
+                const t = Array.from({ length: numTeams }, () => []);
+                const seniors = shuffle(members.filter(m => m.senior));
+                const juniors = shuffle(members.filter(m => !m.senior));
+
+                if (mode === 'snake') {
+                    let all = [...seniors, ...juniors], dir = 1, idx = 0;
+                    all.forEach(m => {
+                        t[idx].push(m);
+                        idx += dir;
+                        if (idx >= numTeams || idx < 0) { dir *= -1; idx += dir; }
+                    });
+                } else if (mode === 'random') {
+                    shuffle([...members]).forEach((m, i) => t[i % numTeams].push(m));
+                } else {
+                    seniors.forEach((s, i) => t[i % numTeams].push(s));
+                    juniors.forEach(j => {
+                        const min = Math.min(...t.map(x => x.length));
+                        t[t.findIndex(x => x.length === min)].push(j);
+                    });
+                }
+
+                // Check separation constraint using IDs
+                if (sep1Id && sep2Id) {
+                    let ok = true;
+                    for (const team of t) {
+                        const hasFirst = team.some(m => m.id === sep1Id);
+                        const hasSecond = team.some(m => m.id === sep2Id);
+                        if (hasFirst && hasSecond) { ok = false; break; }
+                    }
+                    if (!ok) continue;
+                }
+
+                teams = t;
+                render();
+                saveHistory(members.length, numTeams);
+                return;
+            }
+            showErr('Could not satisfy separation constraint. Try different settings.');
+        }
+
+        function render() {
+            const naming = TEAM_NAMES[$('namingStyle').value];
+            $('teamsContainer').innerHTML = teams.map((t, i) => `
+                <div class="glass rounded-lg p-3 border-l-4 team-${i + 1} animate-in" style="animation-delay:${i * 50}ms">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="font-medium text-sm">${naming(i)}</span>
+                        <span class="text-[10px] text-slate-500">${t.length} members</span>
+                    </div>
+                    <div class="space-y-1">${t.map(m => `
+                        <div class="text-xs px-2 py-1 bg-slate-800/50 rounded flex justify-between">
+                            <span>${m.displayName}</span>
+                            ${m.senior ? '<span class="text-amber-400">★</span>' : ''}
+                        </div>`).join('')}
+                    </div>
+                </div>`).join('');
+            $('resultsSection').classList.remove('hidden');
+            $('timestamp').textContent = `Generated: ${new Date().toLocaleString()}`;
+        }
+
+        function showErr(msg) {
+            $('errorMsg').textContent = msg;
+            $('errorMsg').classList.remove('hidden');
+        }
+
+        function saveHistory(members, groups) {
+            history.unshift({ date: new Date().toISOString(), members, groups });
+            if (history.length > 10) history.pop();
+            localStorage.setItem('ts-history', JSON.stringify(history));
+            renderHistory();
+        }
+
+        function renderHistory() {
+            if (!history.length) { $('historyList').innerHTML = '<p>No history yet</p>'; return; }
+            $('historyList').innerHTML = history.slice(0, 3).map(h =>
+                `<div class="text-slate-500">${new Date(h.date).toLocaleDateString()} – ${h.members} → ${h.groups} groups</div>`
+            ).join('');
+            $('historyContent').innerHTML = history.map(h =>
+                `<div class="bg-slate-800 rounded p-2">${new Date(h.date).toLocaleString()}<br><span class="text-slate-400">${h.members} members → ${h.groups} groups</span></div>`
+            ).join('');
+        }
+
+        function copyText() {
+            const naming = TEAM_NAMES[$('namingStyle').value];
+            const txt = teams.map((t, i) => `${naming(i)}:\n${t.map(m => `• ${m.displayName}${m.senior ? ' ★' : ''}`).join('\n')}`).join('\n\n');
+            navigator.clipboard.writeText(txt).then(() => {
+                $('toast').classList.remove('opacity-0');
+                setTimeout(() => $('toast').classList.add('opacity-0'), 2000);
+            });
+        }
+
+        function exportCSV() {
+            const naming = TEAM_NAMES[$('namingStyle').value];
+            let csv = 'Name,DisplayName,Team,Senior\n';
+            teams.forEach((t, i) => t.forEach(m =>
+                csv += `"${m.name}","${m.displayName}","${naming(i)}",${m.senior}\n`
+            ));
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'teams.csv';
+            a.click();
+        }
+
+        // Event listeners
+        $('generateBtn').onclick = generate;
+        $('shuffleBtn').onclick = generate;
+        $('copyBtn').onclick = copyText;
+        $('exportBtn').onclick = exportCSV;
+        $('historyBtn').onclick = () => { $('historyModal').classList.remove('hidden'); $('historyModal').classList.add('flex'); };
+        $('closeHistory').onclick = () => $('historyModal').classList.add('hidden');
+        $('historyModal').onclick = e => { if (e.target === $('historyModal')) $('historyModal').classList.add('hidden'); };
+
+        // Initialize
+        updateUI();
+        renderHistory();
+
+        // ============================================
+        // EXPOSE FOR TESTING (window.TeamSplit)
+        // ============================================
+        window.TeamSplit = {
+            parseMembers,
+            shuffle,
+            generate,
+            getTeams: () => teams,
+            setInput: (text) => { $('namesInput').value = text; updateUI(); },
+            setTeamCount: (n) => { $('teamCount').value = n; $('teamCountDisplay').textContent = n; },
+            setSeparation: (id1, id2) => { $('sep1').value = id1; $('sep2').value = id2; },
+            getMembers: () => parseMembers($('namesInput').value),
+            getError: () => $('errorMsg').classList.contains('hidden') ? null : $('errorMsg').textContent
+        };
+    </script>
+</body>
+
+</html>
