@@ -4,572 +4,1962 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TeamSplit – Professional Team Allocation</title>
-    <meta name="description" content="Intelligent team allocation tool for balanced, fair group assignments.">
-    <!-- Google AdSense -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-8977076286230898"
-        crossorigin="anonymous"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        slate: { 925: '#0b0f1a', 875: '#111827' }
-                    }
-                }
-            }
-        }
-    </script>
+    <title>TeamSplit – Team Allocation</title>
+    <meta name="description" content="Intelligent team allocation tool with drag and drop support.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
+
+        :root {
+            --bg: #fafafa;
+            --card: #fff;
+            --elevated: #f5f5f5;
+            --border: #e5e5e5;
+            --border-strong: #d4d4d4;
+            --text: #0a0a0a;
+            --muted: #525252;
+            --accent: #0a0a0a
+        }
+
         body {
-            font-family: system-ui, -apple-system, sans-serif;
+            font-family: 'Space Grotesk', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh
         }
 
-        .glass {
-            background: rgba(30, 41, 59, 0.5);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(148, 163, 184, 0.1);
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: linear-gradient(90deg, transparent 99%, var(--border) 100%), linear-gradient(0deg, transparent 99%, var(--border) 100%);
+            background-size: 80px 80px;
+            pointer-events: none;
+            opacity: .4;
+            z-index: 0
         }
 
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(8px);
+        .t1 {
+            --tc: #6366f1
+        }
+
+        .t2 {
+            --tc: #10b981
+        }
+
+        .t3 {
+            --tc: #f59e0b
+        }
+
+        .t4 {
+            --tc: #ec4899
+        }
+
+        .t5 {
+            --tc: #8b5cf6
+        }
+
+        .t6 {
+            --tc: #06b6d4
+        }
+
+        .t7 {
+            --tc: #ef4444
+        }
+
+        .t8 {
+            --tc: #14b8a6
+        }
+
+        .t9 {
+            --tc: #f97316
+        }
+
+        .t10 {
+            --tc: #84cc16
+        }
+
+        .t11 {
+            --tc: #a855f7
+        }
+
+        .t12 {
+            --tc: #0ea5e9
+        }
+
+        header {
+            position: relative;
+            z-index: 10;
+            background: var(--card);
+            border-bottom: 2px solid var(--accent);
+            padding: 1.25rem 2rem
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem
+        }
+
+        .logo-mark {
+            width: 44px;
+            height: 44px;
+            background: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative
+        }
+
+        .logo-mark::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 2px solid var(--accent);
+            top: 4px;
+            left: 4px
+        }
+
+        .logo-mark svg {
+            width: 22px;
+            height: 22px;
+            color: #fff
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -.03em;
+            text-transform: uppercase
+        }
+
+        .logo span {
+            display: block;
+            font-size: .6875rem;
+            font-weight: 500;
+            letter-spacing: .15em;
+            text-transform: uppercase;
+            color: var(--muted)
+        }
+
+        .nav-link {
+            font-size: .8rem;
+            font-weight: 600;
+            letter-spacing: .05em;
+            text-transform: uppercase;
+            color: var(--muted);
+            text-decoration: none;
+            padding: .5rem 0;
+            border-bottom: 2px solid transparent;
+            transition: .15s
+        }
+
+        .nav-link:hover {
+            color: var(--text);
+            border-bottom-color: var(--accent)
+        }
+
+        main {
+            position: relative;
+            z-index: 10;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2.5rem 2rem;
+            display: grid;
+            grid-template-columns: 340px 1fr;
+            gap: 2.5rem
+        }
+
+        @media(max-width:1000px) {
+            main {
+                grid-template-columns: 1fr;
+                padding: 1.5rem
             }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
         }
 
-        .animate-in {
-            animation: fadeIn 0.3s ease-out forwards;
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+            position: relative;
+            margin-bottom: 1.5rem;
+            clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%)
         }
 
-        .team-1 {
-            border-left-color: #6366f1;
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 16px;
+            height: 16px;
+            background: linear-gradient(135deg, var(--bg) 50%, var(--border) 50%)
         }
 
-        .team-2 {
-            border-left-color: #10b981;
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: .75rem;
+            margin-bottom: 1.25rem;
+            padding-bottom: .75rem;
+            border-bottom: 1px solid var(--border)
         }
 
-        .team-3 {
-            border-left-color: #f59e0b;
+        .card-header-left {
+            display: flex;
+            align-items: center;
+            gap: .75rem
         }
 
-        .team-4 {
-            border-left-color: #ec4899;
+        .card-header-left::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: var(--accent)
         }
 
-        .team-5 {
-            border-left-color: #06b6d4;
+        .card-title {
+            font-size: .6875rem;
+            font-weight: 700;
+            letter-spacing: .2em;
+            text-transform: uppercase
         }
 
-        .team-6 {
-            border-left-color: #8b5cf6;
+        .form-label {
+            display: block;
+            font-size: .75rem;
+            font-weight: 600;
+            letter-spacing: .05em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: .5rem
         }
 
-        .team-7 {
-            border-left-color: #ef4444;
+        textarea {
+            width: 100%;
+            min-height: 180px;
+            padding: 1rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .875rem;
+            border: 1px solid var(--border);
+            border-radius: 0;
+            resize: vertical;
+            transition: .15s;
+            color: var(--text)
         }
 
-        .team-8 {
-            border-left-color: #14b8a6;
+        #tasksInput {
+            min-height: 80px
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--accent)
+        }
+
+        select,
+        input[type="number"],
+        input[type="text"] {
+            width: 100%;
+            padding: .75rem 1rem;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: .875rem;
+            font-weight: 500;
+            border: 1px solid var(--border);
+            border-radius: 0;
+            transition: .15s;
+            margin-bottom: .75rem;
+            background: #fff;
+            color: var(--text)
+        }
+
+        select:focus,
+        input:focus {
+            outline: none;
+            border-color: var(--accent)
+        }
+
+        .hint {
+            font-size: .7rem;
+            color: var(--muted);
+            margin-top: .5rem;
+            font-family: 'JetBrains Mono', monospace
+        }
+
+        .history-item {
+            font-size: .75rem;
+            color: var(--muted);
+            padding: .25rem 0;
+            border-bottom: 1px dashed var(--border)
+        }
+
+        .history-item.clickable {
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .history-item.clickable:hover {
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.05);
+            padding-left: 0.25rem;
+        }
+
+        .history-item:last-child {
+            border-bottom: none
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: .75rem
+        }
+
+        .stat-box {
+            text-align: center;
+            padding: 1rem;
+            background: var(--elevated);
+            border: 1px solid var(--border)
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace
+        }
+
+        .stat-label {
+            font-size: .625rem;
+            font-weight: 600;
+            letter-spacing: .15em;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-top: .25rem
+        }
+
+        .sep-rule {
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+            padding: .5rem;
+            background: var(--elevated);
+            border: 1px solid var(--border);
+            margin-bottom: .5rem
+        }
+
+        .sep-rule input {
+            margin: 0;
+            flex: 1;
+            padding: .5rem;
+            font-size: .8rem
+        }
+
+        .sep-symbol {
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace
+        }
+
+        .remove-btn {
+            width: 24px;
+            height: 24px;
+            border: 1px solid var(--border);
+            background: none;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: .15s;
+            display: flex;
+            align-items: center;
+            justify-content: center
+        }
+
+        .remove-btn:hover {
+            background: #ef4444;
+            border-color: #ef4444;
+            color: #fff
+        }
+
+        .add-sep-btn {
+            width: 100%;
+            padding: .625rem;
+            border: 1px dashed var(--border-strong);
+            background: none;
+            font-family: inherit;
+            font-size: .75rem;
+            font-weight: 600;
+            letter-spacing: .05em;
+            text-transform: uppercase;
+            color: var(--muted);
+            cursor: pointer;
+            transition: .15s
+        }
+
+        .add-sep-btn:hover {
+            color: var(--text);
+            border-color: var(--accent);
+            background: var(--elevated)
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: .75rem
+        }
+
+        .section-title::before {
+            content: '//';
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            color: var(--muted)
+        }
+
+        .section-title h2 {
+            font-size: .75rem;
+            font-weight: 700;
+            letter-spacing: .15em;
+            text-transform: uppercase
+        }
+
+        .member-count {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .75rem;
+            color: var(--muted)
+        }
+
+        .clear-btn {
+            font-size: .6875rem;
+            font-weight: 600;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: #ef4444;
+            background: none;
+            border: none;
+            cursor: pointer;
+            margin-left: 1rem
+        }
+
+        .list-controls {
+            display: flex;
+            gap: .5rem;
+            margin-bottom: 1rem;
+            align-items: center
+        }
+
+        .list-load {
+            flex: 1
+        }
+
+        .btn-save-list {
+            background: none;
+            border: 1px solid var(--border);
+            color: var(--muted);
+            padding: .5rem;
+            cursor: pointer;
+            font-size: .75rem;
+            font-weight: 600;
+            text-transform: uppercase
+        }
+
+        .btn-save-list:hover {
+            background: var(--elevated);
+            color: var(--text)
+        }
+
+        .actions {
+            display: flex;
+            gap: .5rem;
+            margin-top: 1.25rem
+        }
+
+        .btn-primary {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: .5rem;
+            padding: .75rem 1rem;
+            font-family: inherit;
+            font-size: .75rem;
+            font-weight: 700;
+            letter-spacing: .1em;
+            text-transform: uppercase;
+            color: #fff;
+            background: var(--accent);
+            border: none;
+            cursor: pointer;
+            position: relative;
+            transition: .15s
+        }
+
+        .btn-primary svg {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0
+        }
+
+        .btn-primary::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 2px solid var(--accent);
+            top: 4px;
+            left: 4px;
+            transition: .15s
+        }
+
+        .btn-primary:hover {
+            transform: translate(-2px, -2px)
+        }
+
+        .btn-primary:hover::after {
+            top: 6px;
+            left: 6px
+        }
+
+        .btn-secondary {
+            padding: 1rem;
+            background: var(--card);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: .15s;
+            display: flex;
+            align-items: center;
+            justify-content: center
+        }
+
+        .btn-secondary:hover {
+            background: var(--elevated);
+            border-color: var(--accent)
+        }
+
+        .error-msg {
+            display: none;
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translate(-50%, 20px);
+            padding: .75rem 1.5rem;
+            background: #fee2e2;
+            border: 2px solid #ef4444;
+            color: #991b1b;
+            font-size: .8rem;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, .1);
+            z-index: 200;
+            transition: .3s;
+            opacity: 0;
+            border-radius: 4px
+        }
+
+        .error-msg.show {
+            display: block;
+            transform: translate(-50%, 0);
+            opacity: 1
+        }
+
+        .warning-box {
+            display: none;
+            padding: .75rem 1rem;
+            background: #fef9c3;
+            border-left: 3px solid #f59e0b;
+            color: #854d0e;
+            font-size: .8rem;
+            margin-top: .75rem
+        }
+
+        .warning-box.show {
+            display: block
+        }
+
+        .results-section {
+            display: none
+        }
+
+        .results-section.show {
+            display: block
+        }
+
+        .results-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1.25rem;
+            background: var(--accent);
+            color: #fff
+        }
+
+        .results-title {
+            font-size: .6875rem;
+            font-weight: 700;
+            letter-spacing: .2em;
+            text-transform: uppercase
+        }
+
+        .results-summary {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .75rem;
+            opacity: .8
+        }
+
+        .btn-action {
+            padding: .5rem .75rem;
+            background: rgba(255, 255, 255, .15);
+            border: none;
+            color: #fff;
+            font-size: .6875rem;
+            font-weight: 600;
+            letter-spacing: .05em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: .15s
+        }
+
+        .btn-action:hover {
+            background: rgba(255, 255, 255, .25)
+        }
+
+        .teams-container {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-top: none;
+            padding: 1.5rem
+        }
+
+        .teams-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 1rem
+        }
+
+        .drag-hint {
+            text-align: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .7rem;
+            color: var(--muted);
+            margin-bottom: 1rem;
+            padding: .5rem;
+            border: 1px dashed var(--border)
+        }
+
+        .team-card {
+            background: var(--elevated);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--tc, var(--accent));
+            overflow: hidden;
+            transition: .2s
+        }
+
+        .team-card.drag-over {
+            border-color: var(--tc);
+            transform: scale(1.02);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, .12)
+        }
+
+        .team-card.locked {
+            border-style: dashed;
+            opacity: .8
+        }
+
+        .team-header {
+            display: flex;
+            flex-direction: column;
+            padding: .75rem 1rem;
+            background: var(--card);
+            border-bottom: 1px solid var(--border)
+        }
+
+        .team-header-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%
+        }
+
+        .team-topic {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .7rem;
+            color: var(--text);
+            margin-top: .5rem;
+            padding: .25rem .5rem;
+            background: var(--elevated);
+            border: 1px dashed var(--border);
+            text-align: center;
+            font-weight: 600
+        }
+
+        .team-name {
+            font-size: .875rem;
+            font-weight: 700;
+            letter-spacing: .02em;
+            display: flex;
+            align-items: center;
+            gap: .5rem
+        }
+
+        .team-meta {
+            display: flex;
+            align-items: center;
+            gap: .5rem
+        }
+
+        .team-count {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .6875rem;
+            color: var(--muted);
+            padding: .25rem .5rem;
+            background: var(--elevated)
+        }
+
+        .team-score {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .6875rem;
+            color: var(--tc);
+            font-weight: 700;
+            padding: .25rem .5rem
+        }
+
+        .team-members {
+            padding: .5rem;
+            min-height: 60px
+        }
+
+        .lock-btn {
+            background: none;
+            border: none;
+            color: var(--muted);
+            cursor: pointer;
+            padding: 2px;
+            display: flex;
+            align-items: center;
+            transition: .2s
+        }
+
+        .lock-btn:hover {
+            color: var(--text)
+        }
+
+        .lock-btn.active {
+            color: var(--accent)
+        }
+
+        .member {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: .625rem .75rem;
+            background: var(--card);
+            border: 1px solid var(--border);
+            margin-bottom: .375rem;
+            font-size: .8rem;
+            cursor: grab;
+            transition: .15s;
+            user-select: none;
+            touch-action: none
+        }
+
+        .member:hover {
+            border-color: var(--tc, var(--accent))
+        }
+
+        .member.dragging {
+            opacity: .5;
+            background: var(--elevated);
+            transform: scale(.98)
+        }
+
+        .member:last-child {
+            margin-bottom: 0
+        }
+
+        .member-name {
+            display: flex;
+            align-items: center;
+            gap: .5rem
+        }
+
+        .drag-handle {
+            color: var(--muted);
+            font-size: .7rem;
+            font-family: 'JetBrains Mono', monospace
+        }
+
+        .badges {
+            display: flex;
+            gap: .25rem
+        }
+
+        .badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .6rem;
+            font-weight: 700;
+            padding: .125rem .375rem;
+            border-radius: 2px
+        }
+
+        .badge-senior {
+            color: #b45309;
+            background: #fef3c7
+        }
+
+        .badge-skill {
+            color: #047857;
+            background: #d1fae5
+        }
+
+        .badge-gender-m {
+            color: #1d4ed8;
+            background: #dbeafe
+        }
+
+        .badge-gender-f {
+            color: #be185d;
+            background: #fce7f3
+        }
+
+        .badge-link {
+            color: #4f46e5;
+            background: #e0e7ff;
+            display: flex;
+            align-items: center;
+            gap: 3px
+        }
+
+        .badge-link svg {
+            width: 10px;
+            height: 10px
+        }
+
+        .timestamp {
+            text-align: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .6875rem;
+            color: var(--muted);
+            margin-top: 1.5rem
+        }
+
+        .instructions ol {
+            padding-left: 1.25rem;
+            font-size: .875rem;
+            color: var(--muted);
+            line-height: 2
+        }
+
+        .instructions li::marker {
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            color: var(--text)
+        }
+
+        .instructions strong {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--elevated);
+            padding: .125rem .375rem;
+            color: var(--text)
+        }
+
+        .history-item {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .75rem;
+            color: var(--muted);
+            padding: .5rem;
+            background: var(--elevated);
+            margin-bottom: .375rem;
+            cursor: pointer;
+            transition: .1s
+        }
+
+        .history-item:hover {
+            background: var(--border)
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: var(--accent);
+            color: #fff;
+            padding: .875rem 1.5rem;
+            font-size: .8rem;
+            font-weight: 600;
+            letter-spacing: .05em;
+            text-transform: uppercase;
+            opacity: 0;
+            transition: .2s;
+            z-index: 100;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, .15)
+        }
+
+        .toast::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 2px solid var(--accent);
+            top: 4px;
+            left: 4px
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0)
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .6);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 200
+        }
+
+        .modal-overlay.show {
+            display: flex
+        }
+
+        .modal {
+            background: var(--card);
+            border: 1px solid var(--border);
+            width: 100%;
+            max-width: 440px;
+            margin: 1rem;
+            clip-path: polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 0 100%)
+        }
+
+        .modal.large {
+            max-width: 900px
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1.25rem;
+            background: var(--accent);
+            color: #fff
+        }
+
+        .modal-title {
+            font-size: .6875rem;
+            font-weight: 700;
+            letter-spacing: .2em;
+            text-transform: uppercase
+        }
+
+        .modal-close {
+            width: 28px;
+            height: 28px;
+            border: 1px solid rgba(255, 255, 255, .3);
+            background: none;
+            color: #fff;
+            font-size: 1.25rem;
+            cursor: pointer
+        }
+
+        .modal-content {
+            padding: 1.25rem;
+            max-height: 80vh;
+            overflow-y: auto
+        }
+
+        .modal-item {
+            padding: .75rem 1rem;
+            background: var(--elevated);
+            border: 1px solid var(--border);
+            margin-bottom: .5rem
+        }
+
+        .modal-item-date {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: .75rem
+        }
+
+        .modal-item-details {
+            font-size: .75rem;
+            color: var(--muted)
+        }
+
+        /* Bracket Styles */
+        .bracket-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            overflow-x: auto
+        }
+
+        .tournament-bracket {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem
+        }
+
+        .round {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            gap: 2rem
+        }
+
+        .matchup {
+            background: var(--elevated);
+            border: 1px solid var(--border);
+            padding: .5rem;
+            width: 200px;
+            position: relative
+        }
+
+        .matchup::before {
+            content: '';
+            position: absolute;
+            right: -1rem;
+            top: 50%;
+            width: 1rem;
+            height: 1px;
+            background: var(--border)
+        }
+
+        .team-slot {
+            padding: .5rem;
+            border-bottom: 1px solid var(--border);
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: .75rem;
+            font-weight: 600
+        }
+
+        .team-slot:last-child {
+            border-bottom: none
+        }
+
+        .team-slot.winner {
+            color: var(--tc);
+            font-weight: 700
+        }
+
+        footer {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            padding: 2rem;
+            border-top: 2px solid var(--accent);
+            background: var(--card)
+        }
+
+        footer a {
+            font-size: .6875rem;
+            font-weight: 600;
+            letter-spacing: .15em;
+            text-transform: uppercase;
+            color: var(--muted);
+            text-decoration: none
+        }
+
+        footer a:hover {
+            color: var(--text)
         }
     </style>
 </head>
 
-<body class="bg-slate-925 text-slate-200 min-h-screen">
-
-    <!-- AD: TOP BANNER 728x90 -->
-    <div class="w-full flex justify-center py-2 bg-slate-875 border-b border-slate-800">
-        <ins class="adsbygoogle" style="display:inline-block;width:728px;max-width:100%;height:90px"
-            data-ad-client="ca-pub-8977076286230898" data-ad-slot="auto"></ins>
-        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-    </div>
-    <!-- END AD -->
-
-    <header class="px-4 py-4 border-b border-slate-800">
-        <div class="max-w-6xl mx-auto flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div
-                    class="w-9 h-9 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-mark" id="headerIcon"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                </div>
+                    </svg></div>
                 <div>
-                    <h1 class="text-lg font-semibold text-white">TeamSplit</h1>
-                    <p class="text-[11px] text-slate-500">Professional Team Allocation</p>
+                    <h1>TeamSplit</h1><span id="headerDesc">Pro Allocation Tool</span>
                 </div>
             </div>
-            <button id="historyBtn" class="p-2 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white"
-                title="History">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-            </button>
+            <nav>
+                <a href="#" class="nav-link" id="historyBtn">History</a>
+                <a href="#" class="nav-link" id="guideBtn" style="margin-left:1rem">Guide</a>
+            </nav>
         </div>
+
     </header>
 
-    <main class="max-w-6xl mx-auto px-4 py-6">
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+    <main>
+        <aside>
 
-            <div class="lg:col-span-3 space-y-5">
-                <!-- Members Input -->
-                <section class="glass rounded-xl p-5">
-                    <div class="flex items-center justify-between mb-3">
-                        <h2 class="text-sm font-medium text-slate-300">Team Members</h2>
-                        <div class="flex items-center gap-2">
-                            <span id="memberCount" class="text-xs text-slate-500 bg-slate-800 px-2 py-0.5 rounded">0
-                                members</span>
-                            <button id="clearBtn"
-                                class="text-xs text-slate-500 hover:text-red-400 px-2 py-0.5 rounded hover:bg-red-500/10">Clear</button>
-                        </div>
-                    </div>
-                    <textarea id="namesInput"
-                        class="w-full h-36 bg-slate-800/50 border border-slate-700 rounded-lg p-3 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 resize-none placeholder-slate-600"
-                        placeholder="Enter names, one per line&#10;&#10;Mark senior members with * suffix:&#10;Alice*&#10;Bob&#10;Carol*"></textarea>
-                    <div id="duplicateWarning"
-                        class="hidden mt-2 text-xs text-amber-400 bg-amber-500/10 px-3 py-2 rounded-lg"></div>
-                    <p class="mt-2 text-[11px] text-slate-600">Tip: Add <code class="bg-slate-800 px-1 rounded">*</code>
-                        to denote senior members. Duplicates are auto-numbered.</p>
-                </section>
-
-                <!-- Configuration -->
-                <section class="glass rounded-xl p-5">
-                    <h2 class="text-sm font-medium text-slate-300 mb-4">Configuration</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label class="block text-xs text-slate-500 mb-1.5">Number of Groups</label>
-                            <div class="flex items-center gap-3">
-                                <input type="range" id="teamCount" min="2" max="8" value="2"
-                                    class="flex-1 h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-indigo-500">
-                                <span id="teamCountDisplay"
-                                    class="w-8 h-8 flex items-center justify-center bg-indigo-500/20 text-indigo-400 font-semibold text-sm rounded-lg">2</span>
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-xs text-slate-500 mb-1.5">Distribution Mode</label>
-                            <select id="distMode"
-                                class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500">
-                                <option value="balanced">Balanced (Equal Sizes)</option>
-                                <option value="random">Random</option>
-                                <option value="snake">Snake Draft</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs text-slate-500 mb-1.5">Team Naming</label>
-                            <select id="namingStyle"
-                                class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500">
-                                <option value="numeric">Team 1, Team 2...</option>
-                                <option value="alpha">Team A, Team B...</option>
-                                <option value="colors">Red, Blue, Green...</option>
-                            </select>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Separation Rules -->
-                <section class="glass rounded-xl p-5">
-                    <div class="flex items-center justify-between mb-3">
-                        <h2 class="text-sm font-medium text-slate-300">Separation Rules</h2>
-                        <span class="text-[10px] text-slate-600">Members who should be on different teams</span>
-                    </div>
-                    <div class="flex gap-2 items-center">
-                        <select id="sep1"
-                            class="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500">
-                            <option value="">Select member...</option>
-                        </select>
-                        <span class="text-slate-600 text-xs">≠</span>
-                        <select id="sep2"
-                            class="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-500">
-                            <option value="">Select member...</option>
-                        </select>
-                    </div>
-                </section>
-
-                <!-- Actions -->
-                <div class="flex gap-3">
-                    <button id="generateBtn"
-                        class="flex-1 py-3 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 rounded-lg font-medium shadow-lg shadow-indigo-500/20 transition-all hover:shadow-xl flex items-center justify-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                        </svg>
-                        Generate Teams
-                    </button>
-                    <button id="shuffleBtn"
-                        class="px-4 py-3 bg-slate-800 hover:bg-slate-700 rounded-lg text-slate-400 hover:text-white transition-colors"
-                        title="Reshuffle">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                        </svg>
-                    </button>
-                </div>
-
-                <div id="errorMsg"
-                    class="hidden bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-2.5 rounded-lg text-sm">
-                </div>
-
-                <!-- Results -->
-                <section id="resultsSection" class="hidden">
-                    <div class="flex items-center justify-between mb-3">
-                        <h2 class="text-sm font-medium text-slate-300">Generated Teams</h2>
-                        <div class="flex gap-2">
-                            <button id="copyBtn"
-                                class="text-xs px-3 py-1.5 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 rounded-lg transition-colors">📋
-                                Copy</button>
-                            <button id="exportBtn"
-                                class="text-xs px-3 py-1.5 bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 rounded-lg transition-colors">📤
-                                Export</button>
-                        </div>
-                    </div>
-                    <div id="teamsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
-                    <p id="timestamp" class="text-[10px] text-slate-600 mt-3 text-center"></p>
-                </section>
+            <div class="card">
+                <div class="card-header"><span class="card-title">Configuration</span></div>
+                <label class="form-label" for="teamCount">Number of Teams</label>
+                <input type="number" id="teamCount" min="2" max="100" value="2">
+                <label class="form-label" for="distMode">Distribution</label>
+                <select id="distMode">
+                    <option value="balanced">Balanced</option>
+                    <option value="skill">Skill / Power Balance</option>
+                    <option value="gender">Gender Balance</option>
+                    <option value="random">Random</option>
+                    <option value="snake">Snake Draft</option>
+                </select>
+                <label class="form-label" for="namingStyle">Team Names</label>
+                <select id="namingStyle">
+                    <option value="numeric">1, 2, 3...</option>
+                    <option value="alpha">A, B, C...</option>
+                    <option value="colors">Colors</option>
+                </select>
+                <label class="form-label" for="groupLabel">Group Label</label>
+                <input type="text" id="groupLabel" value="Team" placeholder="e.g. Group, Squad, Table">
+                <label class="form-label" for="promptType">Icebreaker / Retro</label>
+                <select id="promptType">
+                    <option value="fun">Fun (Icebreakers)</option>
+                    <option value="agile">Agile Retro</option>
+                    <option value="deep">Deep Questions</option>
+                </select>
             </div>
 
-            <!-- Sidebar -->
-            <div class="space-y-5">
-                <!-- AD: SIDEBAR 300x250 -->
-                <div class="w-full">
-                    <ins class="adsbygoogle" style="display:inline-block;width:300px;height:250px"
-                        data-ad-client="ca-pub-8977076286230898" data-ad-slot="auto"></ins>
-                    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-                </div>
-                <!-- END AD -->
+            <div class="card">
+                <div class="card-header"><span class="card-title">Assign Tasks / Topics</span></div>
+                <textarea id="tasksInput" class="form-input"
+                    placeholder="// Optional: Enter one topic per line to assign to teams..."></textarea>
+            </div>
 
-                <div class="glass rounded-xl p-4">
-                    <h3 class="text-xs font-medium text-slate-400 mb-2">Quick Stats</h3>
-                    <div class="grid grid-cols-2 gap-2 text-center">
-                        <div class="bg-slate-800/50 rounded-lg p-2">
-                            <div id="statMembers" class="text-lg font-semibold text-indigo-400">0</div>
-                            <div class="text-[10px] text-slate-500">Members</div>
-                        </div>
-                        <div class="bg-slate-800/50 rounded-lg p-2">
-                            <div id="statSeniors" class="text-lg font-semibold text-amber-400">0</div>
-                            <div class="text-[10px] text-slate-500">Seniors</div>
-                        </div>
+            <div class="card">
+                <div class="card-header"><span class="card-title">Separation Rules</span></div>
+                <div id="sepRulesContainer"></div>
+                <button id="addSepBtn" class="add-sep-btn" aria-label="Add separation rule">+ Add Rule</button>
+            </div>
+            <div class="card">
+                <div class="card-header"><span class="card-title">Statistics</span></div>
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <div id="statMembers" class="stat-value">0</div>
+                        <div class="stat-label">Members</div>
+                    </div>
+                    <div class="stat-box">
+                        <div id="statAvgSkill" class="stat-value">-</div>
+                        <div class="stat-label">Avg Skill</div>
                     </div>
                 </div>
+            </div>
 
-                <div class="glass rounded-xl p-4">
-                    <h3 class="text-xs font-medium text-slate-400 mb-2">Recent Sessions</h3>
-                    <div id="historyList" class="space-y-1 text-xs text-slate-500">
-                        <p>No history yet</p>
+            <div class="card">
+                <div class="card-header"><span class="card-title">Recent</span></div>
+                <div id="historyList">
+                    <div class="history-item">// no history</div>
+                </div>
+            </div>
+        </aside>
+
+        <div class="content">
+            <div class="card">
+                <div class="section-header">
+                    <div class="section-title">
+                        <h2>Team Members</h2>
+                    </div>
+                    <div><span id="memberCount" class="member-count">0 members</span><button id="clearBtn"
+                            class="clear-btn" aria-label="Clear all members">Clear</button></div>
+                </div>
+                <textarea id="namesInput"
+                    placeholder="// Example:&#10;Alice + Bob (Merged)&#10;Sarah, Mike, Tom (CSV paste)&#10;John (M) [95]"
+                    aria-label="Enter member names"></textarea>
+                <div id="duplicateWarning" class="warning-box"></div>
+                <p class="hint">// Use <strong>+</strong> to link members, <strong>,</strong> to separate names,
+                    <strong>(M)/(F)</strong> for gender
+                </p>
+                <div class="actions">
+                    <button id="generateBtn" class="btn-primary" aria-label="Generate teams">
+                        <svg fill="none" class="icon-sm" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>Generate
+                    </button>
+                    <button id="shuffleBtn" class="btn-secondary" aria-label="Shuffle teams"
+                        title="Shuffle unlocked teams">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="16 3 21 3 21 8"></polyline>
+                            <line x1="4" y1="20" x2="21" y2="3"></line>
+                            <polyline points="21 16 21 21 16 21"></polyline>
+                            <line x1="15" y1="15" x2="21" y2="21"></line>
+                            <line x1="4" y1="4" x2="9" y2="9"></line>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <section id="resultsSection" class="results-section">
+                <div class="results-header">
+                    <div>
+                        <div class="results-title">Generated Teams</div>
+                        <div id="resultsSummary" class="results-summary"></div>
+                    </div>
+                    <div style="display:flex;gap:.5rem">
+                        <button id="bracketBtn" class="btn-action"
+                            aria-label="View Tournament Bracket">Brackets</button>
+                        <button id="copyBtn" class="btn-action" aria-label="Copy results">Copy</button>
+                        <button id="exportBtn" class="btn-action" aria-label="Export CSV">Export</button>
                     </div>
                 </div>
+                <div class="teams-container">
+                    <div class="drag-hint">// drag to move • 🔒 lock teams to keep them</div>
+                    <div id="teamsContainer" class="teams-grid"></div>
+                    <p id="timestamp" class="timestamp"></p>
+                </div>
+            </section>
+
+            <div class="card instructions">
+                <div class="card-header"><span class="card-title">How to Use</span></div>
+                <ol>
+                    <li>Enter names (one per line, or comma separated).</li>
+                    <li>Link friends with <strong>+</strong> or <strong>&</strong> (e.g. <code>Alice + Bob</code>).</li>
+                    <li>Add <strong>*</strong> for Senior, <strong>[90]</strong> for Skill, <strong>(M)/(F)</strong> for
+                        Gender.</li>
+                    <li>Enter <strong>Tasks / Topics</strong> in the left sidebar to auto-assign them.</li>
+                    <li>Click <strong>Brackets</strong> to view a Tournament tree.</li>
+                </ol>
             </div>
         </div>
     </main>
 
-    <div id="toast"
-        class="fixed bottom-4 left-1/2 -translate-x-1/2 bg-emerald-600 text-white px-4 py-2 rounded-lg shadow-lg opacity-0 transition-opacity duration-300 text-sm">
-        Copied!</div>
+    <div id="errorMsg" class="error-msg"><span id="errorText"></span></div>
+    <div id="toast" class="toast">Copied</div>
 
-    <!-- History Modal -->
-    <div id="historyModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center z-50">
-        <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 w-full max-w-md mx-4">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="font-medium">Session History</h3>
-                <button id="closeHistory" class="text-slate-500 hover:text-white">&times;</button>
-            </div>
-            <div id="historyContent" class="space-y-2 max-h-64 overflow-y-auto text-sm"></div>
+    <div id="historyModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header"><span class="modal-title">History</span><button id="closeHistory"
+                    class="modal-close">&times;</button></div>
+            <div id="historyContent" class="modal-content"></div>
         </div>
     </div>
 
-    <script>
-        // ============================================
-        // TEAMSPLIT CORE LOGIC
-        // ============================================
-        const $ = id => document.getElementById(id);
-        const TEAM_NAMES = { numeric: i => `Team ${i + 1}`, alpha: i => `Team ${'ABCDEFGH'[i]}`, colors: i => ['Red', 'Blue', 'Green', 'Orange', 'Purple', 'Cyan', 'Pink', 'Teal'][i] };
-        let teams = [], history = JSON.parse(localStorage.getItem('ts-history') || '[]');
+    <div id="bracketModal" class="modal-overlay">
+        <div class="modal large">
+            <div class="modal-header"><span class="modal-title">Tournament Bracket</span><button id="closeBracket"
+                    class="modal-close">&times;</button></div>
+            <div id="bracketContent" class="modal-content" style="text-align:center">
+                <div class="bracket-container" id="bracketTree"></div>
+            </div>
+        </div>
+    </div>
 
-        /**
-         * Parse input text into member objects with unique IDs.
-         * Handles duplicate names by appending (#2), (#3), etc.
-         * @param {string} txt - Raw input text
-         * @returns {Array<{id: string, name: string, displayName: string, senior: boolean}>}
-         */
-        function parseMembers(txt) {
-            const lines = txt.split('\n').map(n => n.trim()).filter(n => n);
-            const nameCount = {};
-            const members = [];
+    <div id="guideModal" class="modal-overlay">
+        <div class="modal large">
+            <div class="modal-header"><span class="modal-title">TeamSplit User Guide</span><button id="closeGuide"
+                    class="modal-close">&times;</button></div>
+            <div class="modal-content" style="padding:2rem">
+                <h3
+                    style="margin-bottom:1rem;text-transform:uppercase;font-size:0.9rem;border-bottom:1px solid var(--border);padding-bottom:0.5rem">
+                    1. Member Inputs</h3>
+                <ul style="font-size:0.8rem;margin-bottom:1.5rem;line-height:1.6;padding-left:1.2rem">
+                    <li><strong>John *</strong> : Adds a <span class="badge badge-senior">SR</span> badge (Senior/Lead).
+                    </li>
+                    <li><strong>Sarah (F)</strong> or <strong>(M)</strong> : Sets gender for <span
+                            class="badge badge-gender-f">F</span> / <span class="badge badge-gender-m">M</span>
+                        balancing.</li>
+                    <li><strong>Mike [90]</strong> : Sets skill rating (0-100) for POWER balancing.</li>
+                    <li><strong>Alice + Bob</strong> : Forces them to be on the same team (Linked).</li>
+                    <li><strong>Paste from Excel:</strong> Tab-separated lists and CSVs are automatically detected.</li>
+                </ul>
 
-            lines.forEach((line, index) => {
-                const senior = line.endsWith('*');
-                const baseName = line.replace(/\*$/, '').trim();
+                <h3
+                    style="margin-bottom:1rem;text-transform:uppercase;font-size:0.9rem;border-bottom:1px solid var(--border);padding-bottom:0.5rem">
+                    2. Configuration & Modes</h3>
+                <ul style="font-size:0.8rem;margin-bottom:1.5rem;line-height:1.6;padding-left:1.2rem">
+                    <li><strong>Balanced Mode:</strong> Distributes members evenly.</li>
+                    <li><strong>Skill Mode:</strong> Balances the total Skill/Power score of each team.</li>
+                    <li><strong>Gender Balance:</strong> Ensures equal gender representation per team.</li>
+                    <li><strong>Group Label:</strong> Rename "Team 1" to "Squad 1", "Room A", etc.</li>
+                    <li><strong>Icebreakers:</strong> Select 'Fun', 'Agile', or 'Deep' to enable dice rolls.</li>
+                </ul>
 
-                if (!baseName) return;
+                <h3
+                    style="margin-bottom:1rem;text-transform:uppercase;font-size:0.9rem;border-bottom:1px solid var(--border);padding-bottom:0.5rem">
+                    3. Interactive Features</h3>
+                <ul style="font-size:0.8rem;margin-bottom:1.5rem;line-height:1.6;padding-left:1.2rem">
+                    <li><strong>🔒 Locking:</strong> Click the Lock icon on a team header. 'Generate' will keep that
+                        team intact while reshuffling others.</li>
+                    <li><strong>🖱️ Drag & Drop:</strong> Move members between unlocked teams. You can also drag
+                        <strong>Topic Labels</strong> to swap tasks between teams!
+                    </li>
+                    <li><strong>🎲 Dice Roll:</strong> Click the dice icon on a team card to generate a unique
+                        discussion prompt.</li>
+                    <li><strong>🏆 Bracket:</strong> Click 'Brackets' to generate a tournament tree.</li>
+                </ul>
 
-                // Track occurrences of each name
-                const lowerName = baseName.toLowerCase();
-                nameCount[lowerName] = (nameCount[lowerName] || 0) + 1;
-                const occurrence = nameCount[lowerName];
+                <h3
+                    style="margin-bottom:1rem;text-transform:uppercase;font-size:0.9rem;border-bottom:1px solid var(--border);padding-bottom:0.5rem">
+                    4. Export & Share</h3>
+                <p style="font-size:0.8rem;margin-bottom:0.5rem">Once you are happy with the teams:</p>
+                <ul style="font-size:0.8rem;margin-bottom:0px;line-height:1.6;padding-left:1.2rem">
+                    <li><strong>Copy:</strong> Copies a formatted text summary to clipboard (great for Slack/Email).
+                    </li>
+                    <li><strong>Export:</strong> Downloads a .csv file compatible with Excel/Sheets.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
 
-                // Create unique ID using index
-                const id = `member_${index}_${Date.now()}`;
+    <style>
+        @keyframes pulse-accent {
+            0% {
+                box-shadow: 0 0 0 0 rgba(10, 10, 10, 0.4)
+            }
 
-                // Display name shows (#N) for duplicates
-                const displayName = occurrence > 1 ? `${baseName} (#${occurrence})` : baseName;
+            70% {
+                box-shadow: 0 0 0 6px rgba(10, 10, 10, 0)
+            }
 
-                members.push({
-                    id,
-                    name: baseName,
-                    displayName,
-                    senior,
-                    _occurrence: occurrence
-                });
-            });
-
-            // Go back and mark first occurrences if there are duplicates
-            const finalCounts = {};
-            members.forEach(m => {
-                const key = m.name.toLowerCase();
-                finalCounts[key] = (finalCounts[key] || 0) + 1;
-            });
-
-            const seen = {};
-            members.forEach(m => {
-                const key = m.name.toLowerCase();
-                seen[key] = (seen[key] || 0) + 1;
-                if (finalCounts[key] > 1) {
-                    m.displayName = `${m.name} (#${seen[key]})`;
-                }
-            });
-
-            return members;
-        }
-
-        /**
-         * Check for duplicate names and show warning
-         */
-        function checkDuplicates(members) {
-            const counts = {};
-            members.forEach(m => {
-                const key = m.name.toLowerCase();
-                counts[key] = (counts[key] || 0) + 1;
-            });
-
-            const duplicates = Object.entries(counts).filter(([_, c]) => c > 1);
-
-            if (duplicates.length > 0) {
-                const names = duplicates.map(([name, count]) => `"${name}" (×${count})`).join(', ');
-                $('duplicateWarning').textContent = `⚠️ Duplicate names detected: ${names}. Each has been numbered for clarity.`;
-                $('duplicateWarning').classList.remove('hidden');
-            } else {
-                $('duplicateWarning').classList.add('hidden');
+            100% {
+                box-shadow: 0 0 0 0 rgba(10, 10, 10, 0)
             }
         }
 
-        // Persist names
-        $('namesInput').value = localStorage.getItem('ts-names') || '';
-        $('namesInput').oninput = () => {
-            localStorage.setItem('ts-names', $('namesInput').value);
-            updateUI();
+        .highlight-btn {
+            animation: pulse-accent 2s infinite;
+            color: var(--accent) !important;
+            border-bottom-color: var(--accent) !important
+        }
+
+        .logo-mark,
+        #headerDesc {
+            transition: opacity 0.5s ease;
+            opacity: 1;
+        }
+
+        .fade-out {
+            opacity: 0 !important;
+        }
+    </style>
+
+    <datalist id="memberList"></datalist>
+
+    <script>
+        window.onbeforeunload = () => { window.scrollTo(0, 0) };
+        const $ = id => document.getElementById(id);
+        const TEAM_NAMES = {
+            numeric: i => `${$('groupLabel').value} ${i + 1}`,
+            alpha: i => i < 26 ? `${$('groupLabel').value} ${String.fromCharCode(65 + i)}` : `${$('groupLabel').value} ${String.fromCharCode(65 + Math.floor(i / 26) - 1)}${String.fromCharCode(65 + (i % 26))}`,
+            colors: i => { const c = ['Red', 'Blue', 'Green', 'Orange', 'Purple', 'Cyan', 'Pink', 'Teal', 'Gold', 'Silver', 'Crimson', 'Navy']; return `${$('groupLabel').value} ` + (c[i % c.length] + (i >= c.length ? ` ${Math.floor(i / c.length) + 1}` : '')) }
         };
-        $('clearBtn').onclick = () => {
-            $('namesInput').value = '';
-            localStorage.removeItem('ts-names');
-            updateUI();
+        const TCOLORS = ['t1', 't2', 't3', 't4', 't5', 't6', 't7', 't8', 't9', 't10', 't11', 't12'];
+        let teams = [], teamTopics = [], history = JSON.parse(localStorage.getItem('ts-history') || '[]');
+
+        // Migration: Clear legacy history if it doesn't have the new 'names' property
+        if (history.length > 0 && typeof history[0].names === 'undefined') {
+            history = [];
+            localStorage.removeItem('ts-history');
+        }
+
+        let lockedTeams = new Set();
+        let draggedMember = null, sourceTeamIdx = null;
+
+        // Auto-Open Guide Logic
+        const hasVisited = localStorage.getItem('ts-visited');
+        if (!hasVisited) {
+            setTimeout(() => {
+                $('guideModal').classList.add('show');
+                $('guideBtn').classList.add('highlight-btn');
+                localStorage.setItem('ts-visited', 'true');
+            }, 500);
+        }
+        $('guideBtn').onmouseenter = () => $('guideBtn').classList.remove('highlight-btn');
+
+        // Dynamic Branding Rotation
+        // Dynamic Branding Rotation (Description Only)
+        const BRAND_DESCS = ['Pro Allocation Tool', 'Agile Facilitator', 'Conversation Starter'];
+        let brandIdx = 0;
+        setInterval(() => {
+            brandIdx = (brandIdx + 1) % BRAND_DESCS.length;
+            const desc = $('headerDesc');
+            if (desc) {
+                desc.classList.add('fade-out');
+                setTimeout(() => {
+                    desc.textContent = BRAND_DESCS[brandIdx];
+                    desc.classList.remove('fade-out');
+                }, 500);
+            }
+        }, 5000);
+
+
+        const DEFAULT_NAMES = `Alice + Bob (Merged)\nJames* (M) [85]\nSarah (F) [92]\nMichael* (M) [78]\nEmma (F) [88]\nDavid (M) [65]\nOlivia* (F) [95]\nDaniel (M) [70]\nSophia (F) [82]\nMatthew (M) [60]\nIsabella* (F) [91]\nChristopher (M) [75]\nMia (F) [80]\nAndrew* (M) [89]\nCharlotte (F) [72]\nJoshua (M) [68]\nAmelia (F) [86]\nEthan (M) [77]\nHarper* (F) [94]`;
+
+        $('namesInput').value = localStorage.getItem('ts-names') || DEFAULT_NAMES;
+        const debounce = (fn, ms) => { let t; return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms) } };
+
+        function parseMembers(txt) {
+            let rawLines = [];
+            const splitTxt = txt.replace(/[\t,]/g, '\n');
+            splitTxt.split('\n').forEach(line => {
+                if (line.trim() && !line.trim().startsWith('//')) rawLines.push(line.trim());
+            });
+
+            return rawLines.map((line, i) => {
+                const isLinked = line.includes('+') || line.includes('&');
+                let name = line;
+                const senior = name.includes('*');
+                name = name.replace(/\*/g, '').trim();
+                let skill = 0, gender = null;
+                const skillMatch = name.match(/\[(\d+)\]/);
+                if (skillMatch) { skill = parseInt(skillMatch[1]); name = name.replace(/\[\d+\]/, '').trim(); }
+                const genderMatch = name.match(/\(([MFmf])\)/);
+                if (genderMatch) { gender = genderMatch[1].toUpperCase(); name = name.replace(/\([MFmf]\)/, '').trim(); }
+                if (isLinked) { name = name.replace(/[+&]/g, ' & ').replace(/\s+/g, ' ').trim(); }
+
+                return { id: `m_${i}`, name, senior, skill, gender, isLinked };
+            }).filter(Boolean);
+        }
+
+        function checkDuplicates(members) {
+            const c = {}; members.forEach(m => { const k = m.name.toLowerCase(); c[k] = (c[k] || 0) + 1 });
+            const d = Object.entries(c).filter(([_, n]) => n > 1);
+            if (d.length) { $('duplicateWarning').textContent = `// duplicates: ${d.map(([n, c]) => `${n}(×${c})`).join(', ')}`; $('duplicateWarning').classList.add('show') } else { $('duplicateWarning').classList.remove('show') }
+        }
+
+        const updateSepDropdowns = debounce(() => {
+            const members = parseMembers($('namesInput').value);
+            const datalist = $('memberList');
+            datalist.innerHTML = '';
+            members.forEach(m => datalist.appendChild(Object.assign(document.createElement('option'), { value: m.name })));
+            const totalSkill = members.reduce((sum, m) => sum + m.skill, 0);
+            const avgSkill = members.length ? Math.round(totalSkill / members.length) : 0;
+            $('statAvgSkill').textContent = avgSkill > 0 ? avgSkill : '-';
+        }, 500);
+
+        $('addSepBtn').onclick = () => {
+            const el = document.createElement('div'); el.className = 'sep-rule';
+            el.innerHTML = `<input type="text" placeholder="Name 1" list="memberList" class="sep-input-1"><span class="sep-symbol">≠</span><input type="text" placeholder="Name 2" list="memberList" class="sep-input-2"><button class="remove-btn" aria-label="Remove">&times;</button>`;
+            $('sepRulesContainer').appendChild(el);
+            el.querySelector('.remove-btn').onclick = () => el.remove();
         };
-        $('teamCount').oninput = () => $('teamCountDisplay').textContent = $('teamCount').value;
+
+        function getSepRules() {
+            const rules = [];
+            document.querySelectorAll('.sep-rule').forEach(r => {
+                const n1 = r.querySelector('.sep-input-1').value.trim().toLowerCase(), n2 = r.querySelector('.sep-input-2').value.trim().toLowerCase();
+                if (n1 && n2 && n1 !== n2) rules.push({ n1, n2 });
+            });
+            return rules;
+        }
+
+        $('namesInput').oninput = () => { localStorage.setItem('ts-names', $('namesInput').value); updateUI(); updateSepDropdowns() };
+        $('clearBtn').onclick = () => { $('namesInput').value = ''; localStorage.removeItem('ts-names'); updateUI() };
 
         function updateUI() {
-            const members = parseMembers($('namesInput').value);
-            const seniors = members.filter(x => x.senior);
-
-            checkDuplicates(members);
-
-            $('memberCount').textContent = `${members.length} member${members.length !== 1 ? 's' : ''}`;
-            $('statMembers').textContent = members.length;
-            $('statSeniors').textContent = seniors.length;
-
-            // Update separation dropdowns with unique IDs
-            [$('sep1'), $('sep2')].forEach(sel => {
-                const currentVal = sel.value;
-                sel.innerHTML = '<option value="">Select member...</option>';
-                members.forEach(m => {
-                    const opt = document.createElement('option');
-                    opt.value = m.id;
-                    opt.textContent = m.displayName + (m.senior ? ' ★' : '');
-                    sel.appendChild(opt);
-                });
-                // Restore selection if still valid
-                if (members.some(m => m.id === currentVal)) {
-                    sel.value = currentVal;
-                }
-            });
+            const m = parseMembers($('namesInput').value);
+            checkDuplicates(m);
+            $('memberCount').textContent = `${m.length} unit${m.length !== 1 ? 's' : ''}`;
+            $('statMembers').textContent = m.length;
+            $('statAvgSkill').textContent = m.length ? (m.some(x => x.skill > 0) ? Math.round(m.reduce((a, b) => a + b.skill, 0) / m.length) : '-') : '0';
         }
 
-        function shuffle(a) {
-            const arr = [...a];
-            for (let i = arr.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [arr[i], arr[j]] = [arr[j], arr[i]];
-            }
-            return arr;
-        }
+        function shuffle(a) { const arr = [...a]; for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1));[arr[i], arr[j]] = [arr[j], arr[i]] } return arr }
 
         function generate() {
-            $('errorMsg').classList.add('hidden');
+            $('errorMsg').classList.remove('show');
+            const allMembers = parseMembers($('namesInput').value), numTeams = parseInt($('teamCount').value), sepRules = getSepRules();
 
-            const members = parseMembers($('namesInput').value);
-            const numTeams = +$('teamCount').value;
-            const sep1Id = $('sep1').value;
-            const sep2Id = $('sep2').value;
+            allMembers.forEach((m, i) => m.uid = `${i}_${Date.now()}`);
 
-            // Validation
-            if (!members.length) return showErr('Please add at least one member.');
-            if (members.length < numTeams) return showErr(`Not enough members for ${numTeams} groups.`);
-            if ((sep1Id && !sep2Id) || (!sep1Id && sep2Id)) return showErr('Select both separation members or none.');
-            if (sep1Id && sep1Id === sep2Id) return showErr('Cannot separate a member from themselves.');
+            const numLocked = lockedTeams.size;
+            if (numTeams < numLocked) lockedTeams.clear();
+
+            const lockedMemberNames = new Set();
+            if (teams.length && lockedTeams.size > 0) {
+                teams.forEach((team, idx) => {
+                    if (lockedTeams.has(idx)) team.forEach(m => lockedMemberNames.add(m.name.toLowerCase()));
+                });
+            }
+
+            const availableMembers = allMembers.filter(m => !lockedMemberNames.has(m.name.toLowerCase()));
+            if (!availableMembers.length && lockedTeams.size === 0) return showErr('// add at least one member');
+            if (isNaN(numTeams) || numTeams < 2) return showErr('// minimum 2 teams');
 
             const mode = $('distMode').value;
 
-            for (let attempt = 0; attempt < 500; attempt++) {
-                const t = Array.from({ length: numTeams }, () => []);
-                const seniors = shuffle(members.filter(m => m.senior));
-                const juniors = shuffle(members.filter(m => !m.senior));
+            for (let att = 0; att < 1000; att++) {
+                const t = Array.from({ length: numTeams }, (_, i) => (lockedTeams.has(i) && teams[i]) ? [...teams[i]] : []);
 
-                if (mode === 'snake') {
-                    let all = [...seniors, ...juniors], dir = 1, idx = 0;
-                    all.forEach(m => {
-                        t[idx].push(m);
-                        idx += dir;
-                        if (idx >= numTeams || idx < 0) { dir *= -1; idx += dir; }
-                    });
-                } else if (mode === 'random') {
-                    shuffle([...members]).forEach((m, i) => t[i % numTeams].push(m));
-                } else {
-                    seniors.forEach((s, i) => t[i % numTeams].push(s));
-                    juniors.forEach(j => {
-                        const min = Math.min(...t.map(x => x.length));
-                        t[t.findIndex(x => x.length === min)].push(j);
-                    });
-                }
+                let pool = shuffle([...availableMembers]);
 
-                // Check separation constraint using IDs
-                if (sep1Id && sep2Id) {
-                    let ok = true;
-                    for (const team of t) {
-                        const hasFirst = team.some(m => m.id === sep1Id);
-                        const hasSecond = team.some(m => m.id === sep2Id);
-                        if (hasFirst && hasSecond) { ok = false; break; }
+                if (mode === 'skill') {
+                    pool.sort((a, b) => b.skill - a.skill);
+                    pool.forEach(m => {
+                        let targetIdx = -1, minScore = Infinity;
+                        t.forEach((team, idx) => {
+                            if (lockedTeams.has(idx)) return;
+                            const score = team.reduce((a, b) => a + b.skill, 0);
+                            if (score < minScore) { minScore = score; targetIdx = idx; }
+                        });
+                        if (targetIdx !== -1) t[targetIdx].push(m);
+                    });
+                } else if (mode === 'gender') {
+                    const mPool = pool.filter(x => x.gender === 'M'), fPool = pool.filter(x => x.gender === 'F'), otherPool = pool.filter(x => !x.gender);
+                    [mPool, fPool, otherPool].forEach(subPool => {
+                        let unlockedIndices = t.map((_, i) => i).filter(i => !lockedTeams.has(i));
+                        unlockedIndices = shuffle(unlockedIndices);
+                        subPool.forEach((m, i) => {
+                            t[unlockedIndices[i % unlockedIndices.length]].push(m);
+                        });
+                    });
+                } else if (mode === 'snake') {
+                    const unlockedIndices = t.map((_, i) => i).filter(i => !lockedTeams.has(i));
+                    if (unlockedIndices.length) {
+                        let dir = 1, ptr = 0;
+                        pool.forEach(m => {
+                            t[unlockedIndices[ptr]].push(m);
+                            ptr += dir;
+                            if (ptr >= unlockedIndices.length || ptr < 0) { dir *= -1; ptr += dir; }
+                        });
                     }
-                    if (!ok) continue;
+                } else {
+                    const unlockedIndices = t.map((_, i) => i).filter(i => !lockedTeams.has(i));
+                    if (unlockedIndices.length) {
+                        pool.forEach((m, i) => {
+                            t[unlockedIndices[i % unlockedIndices.length]].push(m);
+                        });
+                    }
                 }
 
-                teams = t;
-                render();
-                saveHistory(members.length, numTeams);
-                return;
+                let ok = true;
+                for (const r of sepRules) {
+                    for (const team of t) {
+                        const has1 = team.some(m => m.name.toLowerCase() === r.n1);
+                        const has2 = team.some(m => m.name.toLowerCase() === r.n2);
+                        if (has1 && has2) { ok = false; break }
+                    }
+                    if (!ok) break;
+                }
+                if (ok) {
+                    teams = t;
+                    // Assign Topics
+                    const tasksLines = $('tasksInput').value.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('//'));
+                    teamTopics = [];
+                    if (tasksLines.length > 0) {
+                        // Shuffle tasks to distribute randomly
+                        const shuffledTasks = shuffle([...tasksLines]);
+                        teams.forEach((_, i) => {
+                            teamTopics[i] = shuffledTasks[i % shuffledTasks.length];
+                        });
+                    }
+                    render();
+                    saveHistory();
+                    localStorage.setItem('ts-teams', JSON.stringify(teams));
+                    localStorage.setItem('ts-topics', JSON.stringify(teamTopics));
+                    return;
+                }
             }
-            showErr('Could not satisfy separation constraint. Try different settings.');
+            showErr('// cannot satisfy rules with current locks');
         }
+
+        function toggleLock(idx) {
+            if (lockedTeams.has(idx)) lockedTeams.delete(idx);
+            else lockedTeams.add(idx);
+            render();
+        }
+
+        const PROMPTS = {
+            'fun': [
+                "Two Truths & a Lie", "Zombie Apocalypse Plan", "First Concert?", "Worst Job You've Had",
+                "Dream Dinner Guest", "Superpower Choice", "Favorite Travel Spot", "Pineapple on Pizza?",
+                "Hidden Talent", "Go-to Karaoke Song", "Cat or Dog Person?", "Morning or Night Owl?",
+                "Tea or Coffee?", "Best Advice Received", "Childhood Hero", "Bucket List Item"
+            ],
+            'agile': [
+                "Start, Stop, Continue", "What went well?", "What didn't go well?", "Kudos / Appreciation",
+                "Puzzle: What's confusing?", "Anchor: What's dragging us?", "Wind: What's pushing us?",
+                "House of Cards: What's fragile?", "Mad, Sad, Glad", "One word to describe sprint",
+                "Improvement for next time", "Risks ahead?"
+            ],
+            'deep': [
+                "Biggest Fear", "Most Defining Moment", "What keeps you up?", "Best Failure",
+                "Who inspires you?", "Life Motto", "Unpopular Opinion", "What are you grateful for?",
+                "Early bird or Night owl?", "Introvert or Extrovert?", "Ideal Weekend"
+            ]
+        };
+        let teamPrompts = [];
+
+        function rollPrompt(idx) {
+            const type = $('promptType').value;
+            const pool = PROMPTS[type] || PROMPTS['fun'];
+            const randomMsg = pool[Math.floor(Math.random() * pool.length)];
+            teamPrompts[idx] = randomMsg;
+            render();
+        }
+
+        // ... existing functions ...
 
         function render() {
-            const naming = TEAM_NAMES[$('namingStyle').value];
-            $('teamsContainer').innerHTML = teams.map((t, i) => `
-                <div class="glass rounded-lg p-3 border-l-4 team-${i + 1} animate-in" style="animation-delay:${i * 50}ms">
-                    <div class="flex justify-between items-center mb-2">
-                        <span class="font-medium text-sm">${naming(i)}</span>
-                        <span class="text-[10px] text-slate-500">${t.length} members</span>
+            const naming = TEAM_NAMES[$('namingStyle').value], total = teams.reduce((s, t) => s + t.length, 0);
+            $('resultsSummary').textContent = `${total} units → ${teams.length} teams`;
+
+            $('teamsContainer').innerHTML = teams.map((t, i) => {
+                const isLocked = lockedTeams.has(i);
+                const skillSum = t.reduce((a, b) => a + b.skill, 0);
+                const topic = teamTopics[i] || '';
+                const prompt = teamPrompts[i] || '';
+                return `
+                <div class="team-card ${TCOLORS[i % 12]} ${isLocked ? 'locked' : ''}" data-team="${i}">
+                    <div class="team-header">
+                        <div class="team-header-top">
+                             <div class="team-name">
+                                <button class="lock-btn ${isLocked ? 'active' : ''}" onclick="toggleLock(${i})" title="${isLocked ? 'Unlock' : 'Lock'} Team">
+                                    ${isLocked ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>`
+                        : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path></svg>`}
+                                </button>
+                                ${naming(i)}
+                                <button class="lock-btn" onclick="rollPrompt(${i})" title="Roll Icebreaker/Prompt" style="margin-left:0.5rem">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><circle cx="8" cy="8" r="1.5"></circle><circle cx="16" cy="16" r="1.5"></circle><circle cx="8" cy="16" r="1.5"></circle><circle cx="16" cy="8" r="1.5"></circle></svg>
+                                </button>
+                            </div>
+                            <div class="team-meta">
+                                 ${skillSum > 0 ? `<span class="team-score">PWR ${skillSum}</span>` : ''}
+                                 <span class="team-count">${t.length}</span>
+                            </div>
+                        </div>
+                        ${topic ? `<div class="team-topic">${topic}</div>` : ''}
+                        ${prompt ? `<div style="font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--muted);margin-top:0.25rem;text-align:center;border-top:1px dashed var(--border);padding-top:0.25rem">🎲 ${prompt}</div>` : ''}
                     </div>
-                    <div class="space-y-1">${t.map(m => `
-                        <div class="text-xs px-2 py-1 bg-slate-800/50 rounded flex justify-between">
-                            <span>${m.displayName}</span>
-                            ${m.senior ? '<span class="text-amber-400">★</span>' : ''}
+                    <div class="team-members" data-team="${i}">${t.map(m => `
+                        <div class="member" draggable="${!isLocked}" data-uid="${m.uid}">
+                            <span class="member-name"><span class="drag-handle">${isLocked ? '🔒' : '::'}</span>${m.name}</span>
+                            <div class="badges">
+                                ${m.isLinked ? `<span class="badge badge-link" title="Paired"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg> LINK</span>` : ''}
+                                ${m.gender == 'M' ? '<span class="badge badge-gender-m">M</span>' : ''}
+                                ${m.gender == 'F' ? '<span class="badge badge-gender-f">F</span>' : ''}
+                                ${m.skill > 0 ? `<span class="badge badge-skill">${m.skill}</span>` : ''}
+                                ${m.senior ? `<span class="badge badge-senior">SR</span>` : ''}
+                            </div>
                         </div>`).join('')}
                     </div>
-                </div>`).join('');
-            $('resultsSection').classList.remove('hidden');
-            $('timestamp').textContent = `Generated: ${new Date().toLocaleString()}`;
+                </div>`
+            }).join('');
+
+            $('resultsSection').classList.add('show');
+            $('timestamp').textContent = `// generated: ${new Date().toISOString()}`;
+            setupDragDrop();
+            if (!window._skipScroll) $('resultsSection').scrollIntoView({ behavior: 'smooth' });
+            window._skipScroll = false;
         }
 
-        function showErr(msg) {
-            $('errorMsg').textContent = msg;
-            $('errorMsg').classList.remove('hidden');
+
+        function setupDragDrop() {
+            const members = document.querySelectorAll('.member');
+            const zones = document.querySelectorAll('.team-members');
+            const topics = document.querySelectorAll('.team-topic');
+            const teamHeaders = document.querySelectorAll('.team-header');
+
+            members.forEach(el => {
+                if (el.getAttribute('draggable') === 'false') return;
+                el.ondragstart = e => {
+                    draggedMember = el;
+                    sourceTeamIdx = parseInt(el.closest('.team-members').dataset.team);
+                    // Use a different drag format or flag to distinguish from topics
+                    e.dataTransfer.setData('type', 'member');
+                    el.classList.add('dragging');
+                    e.dataTransfer.effectAllowed = 'move';
+                };
+                el.ondragend = () => { if (el) el.classList.remove('dragging'); document.querySelectorAll('.team-card').forEach(c => c.classList.remove('drag-over')); draggedMember = null; };
+                el.ontouchstart = e => {
+                    draggedMember = el;
+                    sourceTeamIdx = parseInt(el.closest('.team-members').dataset.team);
+                    el.classList.add('dragging');
+                    document.body.style.overflow = 'hidden';
+                };
+                el.ontouchend = e => {
+                    if (el) el.classList.remove('dragging');
+                    document.body.style.overflow = '';
+                    const touch = e.changedTouches[0];
+                    const target = document.elementFromPoint(touch.clientX, touch.clientY);
+                    const zone = target ? target.closest('.team-members') : null;
+                    if (zone && draggedMember) { handleDrop(zone); }
+                    document.querySelectorAll('.team-card').forEach(c => c.classList.remove('drag-over'));
+                    draggedMember = null;
+                };
+            });
+
+            topics.forEach(el => {
+                const isLocked = el.closest('.team-card').classList.contains('locked');
+                if (isLocked) return;
+
+                el.setAttribute('draggable', 'true');
+                el.style.cursor = 'grab';
+
+                el.ondragstart = e => {
+                    e.dataTransfer.setData('type', 'topic');
+                    e.dataTransfer.setData('srcTeam', el.closest('.team-card').dataset.team);
+                    e.dataTransfer.effectAllowed = 'move';
+                    el.style.opacity = '0.5';
+                };
+                el.ondragend = () => { el.style.opacity = '1'; };
+            });
+
+            zones.forEach(zone => {
+                const teamIdx = parseInt(zone.dataset.team);
+                if (lockedTeams.has(teamIdx)) return;
+                zone.ondragover = e => {
+                    // Only accept members here
+                    if (draggedMember) {
+                        e.preventDefault();
+                        zone.closest('.team-card').classList.add('drag-over');
+                    }
+                };
+                zone.ondragleave = e => { if (!zone.contains(e.relatedTarget)) zone.closest('.team-card').classList.remove('drag-over'); };
+                zone.ondrop = e => { e.preventDefault(); if (draggedMember) handleDrop(zone); };
+            });
+
+            // Allow dropping topics onto team headers
+            teamHeaders.forEach(header => {
+                const teamIdx = parseInt(header.closest('.team-card').dataset.team);
+                if (lockedTeams.has(teamIdx)) return;
+
+                header.ondragover = e => {
+                    // Check if dragging topic? Browsers hide drag data type in dragover often, but we can try
+                    e.preventDefault();
+                    header.style.background = 'var(--elevated)';
+                };
+                header.ondragleave = () => { header.style.background = ''; };
+                header.ondrop = e => {
+                    e.preventDefault();
+                    header.style.background = '';
+                    const type = e.dataTransfer.getData('type');
+
+                    if (type === 'topic') {
+                        const srcIdx = parseInt(e.dataTransfer.getData('srcTeam'));
+                        const destIdx = teamIdx;
+
+                        if (!isNaN(srcIdx) && srcIdx !== destIdx) {
+                            // Swap topics
+                            const temp = teamTopics[srcIdx];
+                            teamTopics[srcIdx] = teamTopics[destIdx];
+                            teamTopics[destIdx] = temp;
+
+                            localStorage.setItem('ts-topics', JSON.stringify(teamTopics));
+                            render();
+                        }
+                    }
+                };
+            });
         }
 
-        function saveHistory(members, groups) {
-            history.unshift({ date: new Date().toISOString(), members, groups });
+
+        function handleDrop(zone) {
+            const targetIdx = parseInt(zone.dataset.team);
+            if (lockedTeams.has(targetIdx)) return;
+            zone.closest('.team-card').classList.remove('drag-over');
+            if (draggedMember && sourceTeamIdx !== null && sourceTeamIdx !== targetIdx) {
+                const uid = draggedMember.dataset.uid;
+                const memberIdx = teams[sourceTeamIdx].findIndex(m => m.uid === uid);
+                if (memberIdx > -1) {
+                    const [member] = teams[sourceTeamIdx].splice(memberIdx, 1);
+                    teams[targetIdx].push(member);
+                    window._skipScroll = true;
+                    render();
+                    localStorage.setItem('ts-teams', JSON.stringify(teams));
+                }
+            }
+        }
+
+        function showErr(msg) { $('errorText').textContent = msg; $('errorMsg').classList.add('show'); setTimeout(() => $('errorMsg').classList.remove('show'), 4000) }
+
+        function saveHistory() {
+            const state = {
+                date: new Date().toISOString(),
+                names: $('namesInput').value,
+                count: $('teamCount').value,
+                mode: $('distMode').value,
+                naming: $('namingStyle').value,
+                label: $('groupLabel').value,
+                tasks: $('tasksInput').value
+            };
+
+            // Redundancy check: Compare with latest
+            if (history.length > 0) {
+                const latest = history[0];
+                if (latest.names === state.names &&
+                    latest.count === state.count &&
+                    latest.mode === state.mode &&
+                    latest.naming === state.naming &&
+                    latest.label === state.label &&
+                    latest.tasks === state.tasks) return;
+            }
+
+            history.unshift(state);
             if (history.length > 10) history.pop();
             localStorage.setItem('ts-history', JSON.stringify(history));
             renderHistory();
         }
 
         function renderHistory() {
-            if (!history.length) { $('historyList').innerHTML = '<p>No history yet</p>'; return; }
-            $('historyList').innerHTML = history.slice(0, 3).map(h =>
-                `<div class="text-slate-500">${new Date(h.date).toLocaleDateString()} – ${h.members} → ${h.groups} groups</div>`
-            ).join('');
-            $('historyContent').innerHTML = history.map(h =>
-                `<div class="bg-slate-800 rounded p-2">${new Date(h.date).toLocaleString()}<br><span class="text-slate-400">${h.members} members → ${h.groups} groups</span></div>`
-            ).join('');
+            if (!history.length) { $('historyList').innerHTML = '<div class="history-item">// no history</div>'; return }
+
+            // Sidebar: Clickable items
+            $('historyList').innerHTML = history.slice(0, 5).map((h, i) => `
+                <div class="history-item clickable" onclick="loadHistory(${i})" title="Restore this config">
+                    <span style="color:var(--accent)">↺</span> ${new Date(h.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    <span style="display:block;color:var(--muted);font-size:0.7em">${h.names.split('\n').filter(x => x.trim()).length} units / ${h.count} teams</span>
+                </div>
+            `).join('');
+
+            // Modal: Detailed items
+            $('historyContent').innerHTML = history.map((h, i) => `
+                <div class="modal-item" style="cursor:pointer" onclick="loadHistory(${i});$('historyModal').classList.remove('show')">
+                    <div class="modal-item-date">${new Date(h.date).toLocaleString()}</div>
+                    <div class="modal-item-details">
+                        <strong>${h.count} Teams</strong> (${h.mode})<br>
+                        ${h.label} naming<br>
+                        ${h.names.split('\n').filter(x => x.trim()).length} members
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function loadHistory(idx) {
+            if (!history[idx]) return;
+            const h = history[idx];
+            $('namesInput').value = h.names;
+            localStorage.setItem('ts-names', h.names);
+            $('teamCount').value = h.count;
+            $('distMode').value = h.mode;
+            $('namingStyle').value = h.naming || 'numeric';
+            $('groupLabel').value = h.label || 'Team';
+            $('tasksInput').value = h.tasks || '';
+
+            updateUI();
+            updateSepDropdowns();
+            // Automatically regenerate to see results? Optional, but good UX.
+            generate();
+
+            $('toast').textContent = 'Configuration restored';
+            $('toast').classList.add('show');
+            setTimeout(() => $('toast').classList.remove('show'), 2000);
+        }
+
+        function renderBracket() {
+            const tNames = teams.map((_, i) => TEAM_NAMES[$('namingStyle').value](i));
+            // Power of 2 logic
+            let bracketTeams = [...tNames];
+            while (Math.log2(bracketTeams.length) % 1 !== 0) { bracketTeams.push('BYE'); }
+
+            let html = '<div class="tournament-bracket" style="flex-direction:row">';
+            let rounds = Math.log2(bracketTeams.length);
+
+            // Simple rounds generation
+            let currentRound = bracketTeams;
+            for (let r = 0; r < rounds; r++) {
+                html += `<div class="round">`;
+                let nextRound = [];
+                for (let i = 0; i < currentRound.length; i += 2) {
+                    html += `
+                    <div class="matchup">
+                        <div class="team-slot">${currentRound[i]}</div>
+                        <div class="team-slot">${currentRound[i + 1]}</div>
+                    </div>`;
+                    nextRound.push('TBD');
+                }
+                html += `</div>`;
+                currentRound = nextRound;
+            }
+            // Winner slot
+            html += `<div class="round"><div class="matchup"><div class="team-slot winner">🏆 WINNER</div></div></div>`;
+            html += '</div>';
+
+            $('bracketTree').innerHTML = html;
+            $('bracketModal').classList.add('show');
         }
 
         function copyText() {
             const naming = TEAM_NAMES[$('namingStyle').value];
-            const txt = teams.map((t, i) => `${naming(i)}:\n${t.map(m => `• ${m.displayName}${m.senior ? ' ★' : ''}`).join('\n')}`).join('\n\n');
-            navigator.clipboard.writeText(txt).then(() => {
-                $('toast').classList.remove('opacity-0');
-                setTimeout(() => $('toast').classList.add('opacity-0'), 2000);
-            });
+            const dateStr = new Date().toLocaleDateString();
+
+            const txt = teams.map((t, i) => {
+                const name = naming(i).toUpperCase();
+
+                // Creative Bracket Header (Robust)
+                const header = `『  ${name}  』`;
+
+                const meta = [];
+                if (teamTopics[i]) meta.push(`Topic: ${teamTopics[i]}`);
+                if (teamPrompts[i]) meta.push(`Intro: ${teamPrompts[i]}`);
+
+                const pwr = t.length ? Math.round(t.reduce((a, b) => a + b.skill, 0) / t.length) : 0;
+                meta.push(`${t.length} Members${pwr > 0 ? ` [${pwr}]` : ''}`);
+
+                const metaTxt = meta.length ? meta.join('\n') + '\n\n' : '';
+
+                const members = t.map(m => {
+                    return `• ${m.name}${m.senior ? ' (Lead)' : ''}`;
+                }).join('\n');
+
+                return `${header}\n${metaTxt}${members}`;
+            }).join('\n\n');
+
+            const fullTxt = `TEAMSPLIT REPORT [${dateStr}]\n\n${txt}`;
+
+            navigator.clipboard.writeText(fullTxt).then(() => { $('toast').classList.add('show'); setTimeout(() => $('toast').classList.remove('show'), 2000) });
         }
 
         function exportCSV() {
             const naming = TEAM_NAMES[$('namingStyle').value];
-            let csv = 'Name,DisplayName,Team,Senior\n';
-            teams.forEach((t, i) => t.forEach(m =>
-                csv += `"${m.name}","${m.displayName}","${naming(i)}",${m.senior}\n`
-            ));
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = 'teams.csv';
-            a.click();
+            // Reordered: Team Context -> Member Details
+            let csv = 'Team Name,Topic,Icebreaker,Member Name,Gender,Role,Skill\n';
+            teams.forEach((t, i) => t.forEach(m => {
+                const tName = naming(i);
+                const tTopic = (teamTopics[i] || '').replace(/"/g, '""');
+                const tPrompt = (teamPrompts[i] || '').replace(/"/g, '""');
+                const mName = m.name.replace(/"/g, '""');
+                const mRole = m.senior ? 'Senior' : 'Member';
+                // CSV Format
+                csv += `"${tName}","${tTopic}","${tPrompt}","${mName}","${m.gender || ''}","${mRole}",${m.skill}\n`;
+            }));
+
+            const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' })); a.download = `teamsplit_export_${new Date().toISOString().slice(0, 10)}.csv`; a.click();
         }
 
-        // Event listeners
         $('generateBtn').onclick = generate;
         $('shuffleBtn').onclick = generate;
         $('copyBtn').onclick = copyText;
         $('exportBtn').onclick = exportCSV;
-        $('historyBtn').onclick = () => { $('historyModal').classList.remove('hidden'); $('historyModal').classList.add('flex'); };
-        $('closeHistory').onclick = () => $('historyModal').classList.add('hidden');
-        $('historyModal').onclick = e => { if (e.target === $('historyModal')) $('historyModal').classList.add('hidden'); };
+        $('bracketBtn').onclick = renderBracket;
+        $('historyBtn').onclick = e => { e.preventDefault(); $('historyModal').classList.add('show') };
+        $('guideBtn').onclick = e => { e.preventDefault(); $('guideModal').classList.add('show') };
+        $('closeHistory').onclick = () => $('historyModal').classList.remove('show');
+        $('closeGuide').onclick = () => $('guideModal').classList.remove('show');
+        $('historyModal').onclick = e => { if (e.target === $('historyModal')) $('historyModal').classList.remove('show') };
+        $('guideModal').onclick = e => { if (e.target === $('guideModal')) $('guideModal').classList.remove('show') };
+        $('closeBracket').onclick = () => $('bracketModal').classList.remove('show');
+        $('bracketModal').onclick = e => { if (e.target === $('bracketModal')) $('bracketModal').classList.remove('show') };
 
-        // Initialize
-        updateUI();
-        renderHistory();
+        updateSavedListsUI();
 
-        // ============================================
-        // EXPOSE FOR TESTING (window.TeamSplit)
-        // ============================================
-        window.TeamSplit = {
-            parseMembers,
-            shuffle,
-            generate,
-            getTeams: () => teams,
-            setInput: (text) => { $('namesInput').value = text; updateUI(); },
-            setTeamCount: (n) => { $('teamCount').value = n; $('teamCountDisplay').textContent = n; },
-            setSeparation: (id1, id2) => { $('sep1').value = id1; $('sep2').value = id2; },
-            getMembers: () => parseMembers($('namesInput').value),
-            getError: () => $('errorMsg').classList.contains('hidden') ? null : $('errorMsg').textContent
-        };
+        const savedTeams = localStorage.getItem('ts-teams');
+        const savedTopics = localStorage.getItem('ts-topics');
+        if (savedTeams) {
+            teams = JSON.parse(savedTeams);
+            if (savedTopics) teamTopics = JSON.parse(savedTopics);
+            if (teams.length) render();
+        }
+
+        updateUI(); renderHistory(); updateSepDropdowns();
     </script>
-    <footer class="text-center py-4 text-xs text-slate-600 border-t border-slate-800 mt-6">
-        <a href="privacy.html" class="hover:text-slate-400">Privacy Policy</a>
-    </footer>
 </body>
 
 </html>
