@@ -1,6 +1,6 @@
 # TeamSplit - Professional Team Allocation
 
-A fast, utility-focused team generator tool. No login required, works offline, dark mode only.
+A fast, utility-focused team generator tool. No login required.
 
 ## Features
 
